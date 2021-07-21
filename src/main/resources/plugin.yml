@@ -1,0 +1,10 @@
+name: OreGenUltimateX
+main: io.github.wsnlance.oregenultimatex.OreGenUltimateX
+version: 0.0.1
+
+commands:
+   ore:
+      description: This is a demo command.
+      usage: /<command> [player]
+      permission: <plugin name>.basic
+      permission-message: You don't have <permission>
