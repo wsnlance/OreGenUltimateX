@@ -24,7 +24,7 @@ public class OreGen extends BukkitRunnable {
     @Override
     public void run() {
     	//测试是否对圆石或石头生成
-    	//待做
+    	//待做 
     	try {
     		Random r = new Random();
         	int i = r.nextInt(10000) + 1;
