@@ -2,9 +2,11 @@ name: OreGenUltimateX
 main: io.github.wsnlance.oregenultimatex.OreGenUltimateX
 version: 0.0.1
 
+softdepend: [Vault]
+
 commands:
-   ore:
-      description: This is a demo command.
-      usage: /<command> [player]
-      permission: <plugin name>.basic
-      permission-message: You don't have <permission>
+    ore:
+        description: This is a demo command.
+        usage: /<command> [level|upgrade]
+        permission: <plugin name>.basic
+        permission-message: You don't have <permission>
