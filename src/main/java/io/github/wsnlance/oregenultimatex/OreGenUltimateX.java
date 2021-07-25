@@ -99,15 +99,15 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     			Math.abs(l_p.getX() - l_b.getX()) <= 10 && //10 is modifiable
     			Math.abs(l_p.getY() - l_b.getY()) <= 10 &&
     			Math.abs(l_p.getZ() - l_b.getZ()) <= 10) {
-    			double playerLevel = playerInfo.get(onlinePlayer.getName());
-    			if ((int)playerLevel > level) {
-    				level = (int)playerLevel;
+    			int playerLevel = (int)(double)playerInfo.get(onlinePlayer.getName());
+    			if (playerLevel > level) {
+    				level = playerLevel;
     			}
     		}
     	}
     	// 
-    	new OreGen(b, levelInfo[level]);
-    	BukkitTask task = new OreGen(event.getBlock(), levelInfo[0]).runTaskLater(this, 1);
+    	//new OreGen(b, levelInfo[level]);
+    	BukkitTask task = new OreGen(event.getBlock(), levelInfo[level]).runTaskLater(this, 1);
     }
     
     
@@ -119,34 +119,38 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     			file.mkdir();
     		}
     		
+    		FileInputStream fis;
+    		BufferedInputStream bis;
+    		String json;
+    		byte[] buffer = new byte[1024];;
+    		int len;
+    		
     		//playerinfo
     		file = new File("plugins/OreGenUltimateX/playerinfo.txt");
-    		if (!file.exists()) {
-    			return;
+    		if (file.exists()) {
+    			fis=new FileInputStream("plugins/OreGenUltimateX/playerinfo.txt");
+                bis=new BufferedInputStream(fis);
+                json = "";
+                len = 0;
+                
+                while((len=bis.read(buffer))!=-1){
+                	json+=new String(buffer, 0, len);
+                }
+                
+                bis.close();
+                playerInfo = gson.fromJson(json, HashMap.class);
     		}
-    		
-    		FileInputStream fis=new FileInputStream("plugins/OreGenUltimateX/playerinfo.txt");
-            BufferedInputStream bis=new BufferedInputStream(fis);
-            String json = "";
-            byte[] buffer = new byte[1024];
-            int len = 0;
-            
-            while((len=bis.read(buffer))!=-1){
-            	json+=new String(buffer, 0, len);
-            }
-            
-            bis.close();
-            
-            playerInfo = gson.fromJson(json, HashMap.class);
-            
+
             //levelinfo
             file = new File("plugins/OreGenUltimateX/levelinfo.txt");
     		if (!file.exists()) {
     			getLogger().info("Create default levelinfo");
-    			levelInfo = new HashMap[1];
+    			levelInfo = new HashMap[2];
     			levelInfo[0] = new HashMap<String, Double>();
-    			levelInfo[0].put("need", 100.0);
-    			levelInfo[0].put("coal", 3.0);
+    			levelInfo[0].put("need", 0.0);
+    			levelInfo[1] = new HashMap<String, Double>();
+    			levelInfo[1].put("need", 100.0);
+    			levelInfo[1].put("COAL_ORE", 5000.0);
     			
     			json = gson.toJson(levelInfo);
     			
@@ -202,20 +206,20 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     	double dlevel = playerInfo.get(playerName);
     	int level = (int)dlevel;
 
-    	if(levelInfo == null || levelInfo.length <= level) {
+    	if(levelInfo == null || levelInfo.length - 1 <= level) {
     		player.sendMessage("" + levelInfo.length);
     		player.sendMessage("There is no higher level");
     		return;
     	}
 
-    	if(economy.getBalance(player) < levelInfo[level].get("need")) {
+    	if(economy.getBalance(player) < levelInfo[level + 1].get("need")) {
     		player.sendMessage("You don't have enough money.");
-    		player.sendMessage(levelInfo[level].get("need").toString() + " is needed");
+    		player.sendMessage(levelInfo[level + 1].get("need").toString() + " is needed");
     		player.sendMessage("You have " + economy.getBalance(player));
     		return;
     	}
 
-    	economy.withdrawPlayer(player, levelInfo[level++].get("need"));
+    	economy.withdrawPlayer(player, levelInfo[++level].get("need"));
     	playerInfo.replace(playerName, (double)level);
     	player.sendMessage("Your Ore Generator level up. It's in level " + level);
     }
