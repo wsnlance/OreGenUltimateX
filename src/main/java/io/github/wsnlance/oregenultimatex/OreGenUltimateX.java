@@ -7,6 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,6 +28,7 @@ import org.bukkit.scheduler.BukkitTask;
 import com.google.gson.Gson;
 
 import net.milkbowl.vault.economy.Economy;
+
 
 public final class OreGenUltimateX extends JavaPlugin implements Listener{
 	HashMap<String, Double> playerInfo = new HashMap<String, Double>();
@@ -74,29 +78,45 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
 	    return false;
 	}
 	
-    @EventHandler
-    public void onStoneGen(BlockFormEvent event) {
-    	//
-    	new OreGen(event.getBlock(), levelInfo[0]);
-    	BukkitTask task = new OreGen(event.getBlock(), levelInfo[0]).runTaskLater(this, 1);
-    }
-    
-    @EventHandler
+	@EventHandler
     public void onPlayerLogin(PlayerJoinEvent event) {
     	String playerName = event.getPlayer().getName();
     	
-    	if(!playerInfo.containsKey(playerName)) {
+    	if (!playerInfo.containsKey(playerName)) {
     		getLogger().info("Sign up new player: " + playerName);
     		playerInfo.put(playerName, 0.0);
     	}
     }
+	
+    @EventHandler
+    public void onStoneGen(BlockFormEvent event) {
+    	int level = 0;
+    	Block b = event.getBlock();
+    	Location l_b = b.getLocation();
+    	for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+    		Location l_p = onlinePlayer.getLocation();
+    		if (onlinePlayer.getWorld() == b.getWorld() && 
+    			Math.abs(l_p.getX() - l_b.getX()) <= 10 && //10 is modifiable
+    			Math.abs(l_p.getY() - l_b.getY()) <= 10 &&
+    			Math.abs(l_p.getZ() - l_b.getZ()) <= 10) {
+    			double playerLevel = playerInfo.get(onlinePlayer.getName());
+    			if ((int)playerLevel > level) {
+    				level = (int)playerLevel;
+    			}
+    		}
+    	}
+    	//
+    	new OreGen(b, levelInfo[level]);
+    	BukkitTask task = new OreGen(event.getBlock(), levelInfo[0]).runTaskLater(this, 1);
+    }
+    
     
     @SuppressWarnings("unchecked")
 	private void load() {
     	try {
     		File file = new File("plugins/OreGenUltimateX");
-    		if(!file.exists()){//如果文件夹不存在
-    			file.mkdir();//创建文件夹
+    		if (!file.exists()) {
+    			file.mkdir();
     		}
     		
     		//playerinfo
@@ -117,7 +137,6 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
             
             bis.close();
             
-            //playerInfo = JSON.parseObject(json, HashMap.class);
             playerInfo = gson.fromJson(json, HashMap.class);
             
             //levelinfo
@@ -159,12 +178,11 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     
     private void save() {
     	try {
-    		//String json = JSON.toJSONString(playerInfo);
     		String json = gson.toJson(playerInfo);
     		
     		File file = new File("plugins/OreGenUltimateX");
-    		if(!file.exists()){//如果文件夹不存在
-    			file.mkdir();//创建文件夹
+    		if (!file.exists()) {
+    			file.mkdir();
     		}
     		
     		FileOutputStream fos=new FileOutputStream("plugins/OreGenUltimateX/playerinfo.txt");
@@ -184,7 +202,6 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     	double dlevel = playerInfo.get(playerName);
     	int level = (int)dlevel;
 
-    	
     	if(levelInfo == null || levelInfo.length <= level) {
     		player.sendMessage("" + levelInfo.length);
     		player.sendMessage("There is no higher level");
@@ -198,9 +215,9 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     		return;
     	}
 
-    	economy.withdrawPlayer(player, levelInfo[level].get("need"));
-    	playerInfo.replace(playerName, level + 1.0);
-    	player.sendMessage("Your Ore Generator level up. It's in level " + (level + 1));
+    	economy.withdrawPlayer(player, levelInfo[level++].get("need"));
+    	playerInfo.replace(playerName, (double)level);
+    	player.sendMessage("Your Ore Generator level up. It's in level " + level);
     }
     
     private boolean setupEconomy() {
