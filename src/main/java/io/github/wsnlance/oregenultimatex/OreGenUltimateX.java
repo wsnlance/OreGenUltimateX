@@ -29,7 +29,7 @@ import net.milkbowl.vault.economy.Economy;
 
 public final class OreGenUltimateX extends JavaPlugin implements Listener{
 	HashMap<String, PlayerInfo> playerInfo = new HashMap<String, PlayerInfo>();
-	HashMap<String, Double>[] levelInfo;
+	LevelInfo[] levelInfo;
 	Gson gson = new Gson();
 	public static Economy economy = null;
 	
@@ -115,13 +115,15 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
             //levelinfo
             file = new File("plugins/OreGenUltimateX/levelinfo.txt");
     		if (!file.exists()) {
+    			HashMap<String, Double> product;
+    			
     			getLogger().info("Create default levelinfo");
-    			levelInfo = new HashMap[2];
-    			levelInfo[0] = new HashMap<String, Double>();
-    			levelInfo[0].put("need", 0.0);
-    			levelInfo[1] = new HashMap<String, Double>();
-    			levelInfo[1].put("need", 100.0);
-    			levelInfo[1].put("COAL_ORE", 5000.0);
+    			levelInfo = new LevelInfo[2];
+    			levelInfo[0] = new LevelInfo();
+    			levelInfo[1] = new LevelInfo();
+    			levelInfo[1].setNeed(100);
+    			product = levelInfo[1].getProduct();
+    			product.put("COAL_ORE", 5000.0);
     			
     			json = gson.toJson(levelInfo);
     			
@@ -144,7 +146,7 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
             
             bis.close();
             
-            levelInfo = gson.fromJson(json, HashMap[].class);
+            levelInfo = gson.fromJson(json, LevelInfo[].class);
 
     	}catch (Exception e) {
     		e.printStackTrace();

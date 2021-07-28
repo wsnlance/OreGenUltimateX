@@ -1,6 +1,5 @@
 package io.github.wsnlance.oregenultimatex;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,12 +12,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class OreGen extends BukkitRunnable {
 
     private final Block b;
-    private final Map<String, Double> levelInfo;
+    private final Map<String, Double> products;
     
 
-    public OreGen(Block b, HashMap<String, Double> levelInfo) {
+    public OreGen(Block b, LevelInfo levelInfo) {
         this.b = b;
-        this.levelInfo = levelInfo;
+        this.products = levelInfo.getProduct();
     }
 
     @Override
@@ -28,13 +27,10 @@ public class OreGen extends BukkitRunnable {
     	try {
     		Random r = new Random();
         	int i = r.nextInt(10000) + 1;
-        	Iterator<Entry<String, Double>> iter = levelInfo.entrySet().iterator();
+        	Iterator<Entry<String, Double>> iter = products.entrySet().iterator();
         	while(iter.hasNext()) {
         		Map.Entry<String, Double> entry = (Map.Entry<String, Double>) iter.next();
         		String materialType = entry.getKey();
-        		if (materialType.equals("need")) {
-        			continue;
-        		}
         		double prob = entry.getValue();
         		//to be changed
         		i -= prob;

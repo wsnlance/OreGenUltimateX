@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class LevelInfo {
 	double need = 0;
-	HashMap<String, Double> product;
+	HashMap<String, Double> product = new HashMap<String, Double>();
 	
 	double getNeed() {
 		return this.need;

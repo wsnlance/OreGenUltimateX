@@ -79,14 +79,14 @@ public class OreGenUltimateXCommandExecutor implements CommandExecutor{
     		return;
     	}
 
-    	if(OreGenUltimateX.economy.getBalance(player) < plugin.levelInfo[level + 1].get("need")) {
+    	if(OreGenUltimateX.economy.getBalance(player) < plugin.levelInfo[level + 1].getNeed()) {
     		player.sendMessage("You don't have enough money.");
-    		player.sendMessage(plugin.levelInfo[level + 1].get("need").toString() + " is needed");
+    		player.sendMessage("" + plugin.levelInfo[level + 1].getNeed() + " is needed");
     		player.sendMessage("You have " + OreGenUltimateX.economy.getBalance(player));
     		return;
     	}
 
-    	OreGenUltimateX.economy.withdrawPlayer(player, plugin.levelInfo[++level].get("need"));
+    	OreGenUltimateX.economy.withdrawPlayer(player, plugin.levelInfo[++level].getNeed());
     	plugin.playerInfo.get(playerName).setLevel(level);
     	player.sendMessage("Your Ore Generator level up. It's in level " + level);
     }
