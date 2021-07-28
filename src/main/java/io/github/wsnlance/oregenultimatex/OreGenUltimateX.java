@@ -118,12 +118,17 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     			HashMap<String, Double> product;
     			
     			getLogger().info("Create default levelinfo");
-    			levelInfo = new LevelInfo[2];
+    			levelInfo = new LevelInfo[3];
     			levelInfo[0] = new LevelInfo();
     			levelInfo[1] = new LevelInfo();
     			levelInfo[1].setNeed(100);
     			product = levelInfo[1].getProduct();
     			product.put("COAL_ORE", 5000.0);
+    			levelInfo[2] = new LevelInfo();
+    			levelInfo[2].setNeed(500);
+    			product = levelInfo[2].getProduct();
+    			product.put("COAL_ORE", 5000.0);
+    			product.put("IRON_ORE", 2500.0);
     			
     			json = gson.toJson(levelInfo);
     			
