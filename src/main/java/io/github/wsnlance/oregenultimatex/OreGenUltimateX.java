@@ -10,8 +10,6 @@ import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +17,6 @@ import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 //import org.black_ixx.bossshop.BossShop;
 //import org.black_ixx.bossshop.api.BossShopAPI;
@@ -31,13 +28,14 @@ import net.milkbowl.vault.economy.Economy;
 
 
 public final class OreGenUltimateX extends JavaPlugin implements Listener{
-	HashMap<String, Double> playerInfo = new HashMap<String, Double>();
+	HashMap<String, PlayerInfo> playerInfo = new HashMap<String, PlayerInfo>();
 	HashMap<String, Double>[] levelInfo;
 	Gson gson = new Gson();
-	private static Economy economy = null;
+	public static Economy economy = null;
 	
 	@Override
     public void onEnable() {
+		this.getCommand("basic").setExecutor(new OreGenUltimateXCommandExecutor(this));
 		getServer().getPluginManager().registerEvents(this, this);
 		if (!setupEconomy() ) {
 			getLogger().info(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
@@ -52,39 +50,13 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
 		save();
     }
 	
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-	    if (cmd.getName().equalsIgnoreCase("ore")) {
-	    	if (args.length == 0) {
-	    		
-	    	}else if (args.length == 1) {
-	    		if(args[0].equalsIgnoreCase("level")) {
-	    			double level = playerInfo.get(sender.getName());
-	    			sender.sendMessage("Your Ore Generator is in level " + (int)level);
-
-	    			return true;
-	    		}else if (args[0].equalsIgnoreCase("upgrade")) {
-	    			OreGenLevelUp((Player)sender);
-	    			return true;
-	    		}else {
-	    			
-	    		}
-	    		
-	    	}else {
-	    		sender.sendMessage("Too many arguments!");
-	    	}
-	    }
-	    
-	    return false;
-	}
-	
 	@EventHandler
     public void onPlayerLogin(PlayerJoinEvent event) {
     	String playerName = event.getPlayer().getName();
     	
     	if (!playerInfo.containsKey(playerName)) {
     		getLogger().info("Sign up new player: " + playerName);
-    		playerInfo.put(playerName, 0.0);
+    		playerInfo.put(playerName, new PlayerInfo());
     	}
     }
 	
@@ -99,15 +71,14 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     			Math.abs(l_p.getX() - l_b.getX()) <= 10 && //10 is modifiable
     			Math.abs(l_p.getY() - l_b.getY()) <= 10 &&
     			Math.abs(l_p.getZ() - l_b.getZ()) <= 10) {
-    			int playerLevel = (int)(double)playerInfo.get(onlinePlayer.getName());
+    			int playerLevel = playerInfo.get(onlinePlayer.getName()).getLevel();
     			if (playerLevel > level) {
     				level = playerLevel;
     			}
     		}
     	}
-    	// 
-    	//new OreGen(b, levelInfo[level]);
-    	BukkitTask task = new OreGen(event.getBlock(), levelInfo[level]).runTaskLater(this, 1);
+
+    	new OreGen(event.getBlock(), levelInfo[level]).runTaskLater(this, 1);
     }
     
     
@@ -201,28 +172,6 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
     	}
     }
     
-    private void OreGenLevelUp(Player player) {
-    	String playerName = player.getName();
-    	double dlevel = playerInfo.get(playerName);
-    	int level = (int)dlevel;
-
-    	if(levelInfo == null || levelInfo.length - 1 <= level) {
-    		player.sendMessage("" + levelInfo.length);
-    		player.sendMessage("There is no higher level");
-    		return;
-    	}
-
-    	if(economy.getBalance(player) < levelInfo[level + 1].get("need")) {
-    		player.sendMessage("You don't have enough money.");
-    		player.sendMessage(levelInfo[level + 1].get("need").toString() + " is needed");
-    		player.sendMessage("You have " + economy.getBalance(player));
-    		return;
-    	}
-
-    	economy.withdrawPlayer(player, levelInfo[++level].get("need"));
-    	playerInfo.replace(playerName, (double)level);
-    	player.sendMessage("Your Ore Generator level up. It's in level " + level);
-    }
     
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
