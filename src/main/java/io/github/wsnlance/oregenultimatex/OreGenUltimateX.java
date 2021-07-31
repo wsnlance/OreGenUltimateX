@@ -35,7 +35,7 @@ public final class OreGenUltimateX extends JavaPlugin implements Listener{
 	
 	@Override
     public void onEnable() {
-		this.getCommand("basic").setExecutor(new OreGenUltimateXCommandExecutor(this));
+		this.getCommand("ore").setExecutor(new OreGenUltimateXCommandExecutor(this));
 		getServer().getPluginManager().registerEvents(this, this);
 		if (!setupEconomy() ) {
 			getLogger().info(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
